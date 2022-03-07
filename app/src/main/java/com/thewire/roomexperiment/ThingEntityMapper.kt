@@ -1,6 +1,7 @@
 package com.thewire.roomexperiment
 
 import com.thewire.roomexperiment.database.model.ThingEntity
+import com.thewire.roomexperiment.domain.model.OtherThing
 import com.thewire.roomexperiment.domain.model.Thing
 
 class ThingEntityMapper() {
@@ -10,6 +11,8 @@ class ThingEntityMapper() {
             id = thingEntity.id!!,
             description = thingEntity.description,
             tf = thingEntity.tf,
+            embed = thingEntity.embedTest,
+            other = thingEntity.otherThing,
         )
     }
 
@@ -17,6 +20,8 @@ class ThingEntityMapper() {
         return ThingEntity(
             description = thing.description,
             tf = thing.tf,
+            embedTest = thing.embed,
+            otherThing = thing.other,
         )
     }
 }

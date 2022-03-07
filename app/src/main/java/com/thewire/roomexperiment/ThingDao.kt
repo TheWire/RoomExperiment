@@ -17,5 +17,8 @@ interface ThingDao {
    @Query("SELECT * FROM things WHERE id =:id ")
    suspend fun getThingById(id: Int): ThingEntity?
 
+   @Query("SELECT * FROM things WHERE embedTest_exampleInt=:exInt")
+   suspend fun getEmbedByInt(exInt: Int): List<ThingEntity>
+
 
 }

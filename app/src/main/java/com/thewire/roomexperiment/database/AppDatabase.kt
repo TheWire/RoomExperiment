@@ -2,10 +2,13 @@ package com.thewire.roomexperiment.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.thewire.roomexperiment.ThingDao
 import com.thewire.roomexperiment.database.model.ThingEntity
+import com.thewire.roomexperiment.database.model.ThingTypeConverter
 
-@Database(entities = [ThingEntity::class], version = 1)
+@Database(entities = [ThingEntity::class], version = 4)
+@TypeConverters(ThingTypeConverter::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun thingDao(): ThingDao
 
