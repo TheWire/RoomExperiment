@@ -20,8 +20,10 @@ import com.thewire.roomexperiment.database.AppDatabase
 import com.thewire.roomexperiment.domain.model.Embed
 import com.thewire.roomexperiment.domain.model.OtherThing
 import com.thewire.roomexperiment.domain.model.Thing
+import com.thewire.roomexperiment.domain.model.ThingAndOtherModel
 import com.thewire.roomexperiment.interactors.GetByEmbed
 import com.thewire.roomexperiment.interactors.GetThing
+import com.thewire.roomexperiment.interactors.GetThingAndOther
 import com.thewire.roomexperiment.interactors.InsertThing
 import com.thewire.roomexperiment.ui.theme.RoomExperimentTheme
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +37,7 @@ class MainActivity : ComponentActivity() {
     lateinit var getThing: GetThing
     lateinit var getByEmbed: GetByEmbed
     lateinit var insertThing: InsertThing
+    lateinit var getThingAndOther: GetThingAndOther
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,15 +50,17 @@ class MainActivity : ComponentActivity() {
 
         val dao = db.thingDao()
         val mapper = ThingEntityMapper()
+        val otherMapper = ThingOtherEntityMapper()
         getThing = GetThing(dao, mapper)
         getByEmbed = GetByEmbed(dao, mapper)
-        insertThing = InsertThing(dao, mapper)
+        insertThing = InsertThing(dao, otherMapper)
+        getThingAndOther = GetThingAndOther(dao, otherMapper)
 
         setContent {
             RoomExperimentTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    DatabaseScreen(getThing = getThing, getByEmbed = getByEmbed, insertThing = insertThing)
+                    DatabaseScreen(getThingAndOther = getThingAndOther, getByEmbed = getByEmbed, insertThing = insertThing)
                 }
             }
         }
@@ -63,50 +68,55 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DatabaseScreen(getThing: GetThing, getByEmbed: GetByEmbed, insertThing:InsertThing) {
+fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, insertThing:InsertThing) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        val description = remember{ mutableStateOf("insert description")}
+        val description = remember{ mutableStateOf("")}
         val tf = remember{ mutableStateOf(false)}
         TextField(
             value = description.value,
-            onValueChange = { description.value = it }
+            onValueChange = { description.value = it },
+            label = { Text("insert description") }
         )
         Checkbox(
             checked = tf.value,
             onCheckedChange = { tf.value = it }
         )
-        val embedString = remember{ mutableStateOf("insert embed text")}
+        val embedString = remember{ mutableStateOf("")}
         TextField(
             value = embedString.value,
-            onValueChange = { embedString.value = it }
+            onValueChange = { embedString.value = it },
+            label = { Text("insert embed text") }
         )
-        val embedInt = remember{ mutableStateOf("insert embed int")}
+        val embedInt = remember{ mutableStateOf("")}
         TextField(
             value = embedInt.value,
-            onValueChange = { embedInt.value = it }
+            onValueChange = { embedInt.value = it },
+            label = { Text("insert embed int") }
         )
         val othertf = remember{ mutableStateOf(false)}
         Checkbox(
             checked = othertf.value,
             onCheckedChange = { othertf.value = it }
         )
-        val otherUri = remember{ mutableStateOf("other thing uri")}
+        val otherUri = remember{ mutableStateOf("")}
         TextField(
             value = otherUri.value,
-            onValueChange = { otherUri.value = it }
+            onValueChange = { otherUri.value = it },
+            label = { Text("other thing uri") }
         )
-        val otherInt = remember{ mutableStateOf("other thing int")}
+        val otherInt = remember{ mutableStateOf("")}
         TextField(
             value = otherInt.value,
-            onValueChange = { otherInt.value = it }
+            onValueChange = { otherInt.value = it },
+            label = { Text("other thing int") }
         )
         Button(
             onClick = {
                 if(description.value != "") {
                     goInsertThing(
-                        Thing(
+                        ThingAndOtherModel(
                             0,
                             description.value,
                             tf.value,
@@ -127,7 +137,7 @@ fun DatabaseScreen(getThing: GetThing, getByEmbed: GetByEmbed, insertThing:Inser
             Text("Insert")
         }
         ThingGetter(
-            getThing = getThing
+            getThingAndOther = getThingAndOther
         )
         EmbedGetter(
            getByEmbed = getByEmbed
@@ -137,23 +147,35 @@ fun DatabaseScreen(getThing: GetThing, getByEmbed: GetByEmbed, insertThing:Inser
 }
 
 @Composable
-fun ThingGetter(getThing: GetThing) {
+fun ThingGetter(getThingAndOther: GetThingAndOther) {
 
     Column() {
-        val list: MutableList<Thing> = remember {
+        val list: MutableList<ThingAndOtherModel> = remember {
             mutableStateListOf()
         }
-        val idString = remember { mutableStateOf("id of thing to get goes here")}
-        TextField(value = idString.value, onValueChange = { idString.value = it })
+        val idString = remember { mutableStateOf("")}
+        TextField(
+            value = idString.value,
+            onValueChange = { idString.value = it },
+            label = { Text("id of thing to get goes here") }
+        )
         Button(
             onClick = {
-                    goGetThing(idString.value.toInt(), getThing, list, MainScope())
+                    goGetThingAndOther(idString.value.toInt(), getThingAndOther, list, MainScope())
                 }
         ) {
             Text("Get")
         }
         list.forEach {
-            Thing(it)
+            Thing(
+                Thing(
+                    id = it.id,
+                    description = it.description,
+                    tf = it.tf,
+                    embed = it.embed
+                )
+            )
+            OtherThing(it.other)
         }
     }
 }
@@ -165,8 +187,12 @@ fun EmbedGetter(getByEmbed: GetByEmbed) {
         val list: MutableList<Thing> = remember {
             mutableStateListOf()
         }
-        val idString = remember { mutableStateOf("embed int")}
-        TextField(value = idString.value, onValueChange = { idString.value = it })
+        val idString = remember { mutableStateOf("")}
+        TextField(
+            value = idString.value,
+            onValueChange = { idString.value = it },
+            label = { Text("embed int") }
+        )
         Button(
             onClick = {
                 goGetEmbed(idString.value.toInt(), getByEmbed, list, MainScope())
@@ -187,9 +213,14 @@ fun Thing(thing: Thing) {
     Text(thing.tf.toString())
     Text(thing.embed.exampleString)
     Text(thing.embed.exampleInt.toString())
-    Text(thing.other.b.toString())
-    Text(thing.other.uri.toString())
-    Text(thing.other.i.toString())
+
+}
+
+@Composable
+fun OtherThing(other: OtherThing) {
+    Text(other.b.toString())
+    Text(other.uri.toString())
+    Text(other.i.toString())
 }
 
 fun goGetThing(
@@ -209,6 +240,25 @@ fun goGetThing(
                 }
             }
         }
+}
+
+fun goGetThingAndOther(
+    thingId: Int,
+    getThingAndOther: GetThingAndOther,
+    list: MutableList<ThingAndOtherModel>,
+    scope: CoroutineScope
+) {
+    scope.launch {
+        getThingAndOther.execute(thingId).collect {
+            it.data?.let { thing ->
+                list.add(thing)
+            }
+
+            it.error?.let { error ->
+                Log.e(TAG, error)
+            }
+        }
+    }
 }
 
 fun goGetEmbed(
@@ -232,7 +282,7 @@ fun goGetEmbed(
     }
 }
 
-fun goInsertThing(thing: Thing, insertThing: InsertThing, scope: CoroutineScope) {
+fun goInsertThing(thing: ThingAndOtherModel, insertThing: InsertThing, scope: CoroutineScope) {
     scope.launch {
         insertThing.execute(thing).collect {
             it.error?.let { error ->

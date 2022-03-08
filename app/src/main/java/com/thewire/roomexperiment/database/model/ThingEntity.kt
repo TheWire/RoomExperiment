@@ -1,9 +1,6 @@
 package com.thewire.roomexperiment.database.model
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.*
 import com.thewire.roomexperiment.domain.model.Embed
 import com.thewire.roomexperiment.domain.model.OtherThing
 
@@ -23,6 +20,6 @@ data class ThingEntity(
     @Embedded(prefix = "embedTest_")
     var embedTest: Embed,
 
-    @Embedded
-    var otherThing: OtherThing
+    @ColumnInfo(name = "otherThingId")
+    var otherThingId: Int = 0,
 )
