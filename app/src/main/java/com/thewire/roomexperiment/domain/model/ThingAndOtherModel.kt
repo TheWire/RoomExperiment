@@ -5,5 +5,6 @@ data class ThingAndOtherModel(
     val description: String,
     val tf: Boolean,
     val embed: Embed,
+    val n: String?,
     val other: OtherThing
 )

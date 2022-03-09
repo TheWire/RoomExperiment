@@ -5,4 +5,5 @@ data class Thing(
     val description: String,
     val tf: Boolean,
     val embed: Embed,
+    val n: String?
 )

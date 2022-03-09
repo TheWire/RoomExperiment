@@ -6,4 +6,5 @@ data class OtherThing(
     val b: Boolean,
     val i: Int,
     val uri: Uri,
+    val anotherThing: AnotherThing,
 )

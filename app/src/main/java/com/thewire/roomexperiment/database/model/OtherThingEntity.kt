@@ -15,4 +15,6 @@ data class OtherThingEntity (
     var uri: String,
     @ColumnInfo(name = "i")
     var i: Int,
+    @ColumnInfo(name = "another_thing_id")
+    var anotherThing: Int = 0
 )

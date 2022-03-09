@@ -17,10 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.room.Room
 import com.thewire.roomexperiment.database.AppDatabase
-import com.thewire.roomexperiment.domain.model.Embed
-import com.thewire.roomexperiment.domain.model.OtherThing
-import com.thewire.roomexperiment.domain.model.Thing
-import com.thewire.roomexperiment.domain.model.ThingAndOtherModel
+import com.thewire.roomexperiment.domain.model.*
 import com.thewire.roomexperiment.interactors.GetByEmbed
 import com.thewire.roomexperiment.interactors.GetThing
 import com.thewire.roomexperiment.interactors.GetThingAndOther
@@ -95,6 +92,12 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
             onValueChange = { embedInt.value = it },
             label = { Text("insert embed int") }
         )
+        val nString = remember{ mutableStateOf("")}
+        TextField(
+            value = nString.value,
+            onValueChange = { nString.value = it },
+            label = { Text("nullable string") }
+        )
         val othertf = remember{ mutableStateOf(false)}
         Checkbox(
             checked = othertf.value,
@@ -112,6 +115,12 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
             onValueChange = { otherInt.value = it },
             label = { Text("other thing int") }
         )
+        val anotherText = remember{ mutableStateOf("")}
+        TextField(
+            value = anotherText.value,
+            onValueChange = { anotherText.value = it },
+            label = { Text("another thing text") }
+        )
         Button(
             onClick = {
                 if(description.value != "") {
@@ -124,10 +133,12 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
                                 embedString.value,
                                 Integer.parseInt(embedInt.value)
                             ),
+                            n = nString.value.ifEmpty { null },
                             OtherThing(
                                 othertf.value,
                                 Integer.parseInt(otherInt.value),
-                                uri = Uri.parse(otherUri.value)
+                                uri = Uri.parse(otherUri.value),
+                                anotherThing = AnotherThing(anotherText.value)
                             )
                         ), insertThing, MainScope())
                     description.value = ""
@@ -172,7 +183,8 @@ fun ThingGetter(getThingAndOther: GetThingAndOther) {
                     id = it.id,
                     description = it.description,
                     tf = it.tf,
-                    embed = it.embed
+                    embed = it.embed,
+                    n = it.n
                 )
             )
             OtherThing(it.other)
@@ -213,6 +225,9 @@ fun Thing(thing: Thing) {
     Text(thing.tf.toString())
     Text(thing.embed.exampleString)
     Text(thing.embed.exampleInt.toString())
+    thing.n?.let {
+        Text(it)
+    }
 
 }
 
@@ -221,6 +236,7 @@ fun OtherThing(other: OtherThing) {
     Text(other.b.toString())
     Text(other.uri.toString())
     Text(other.i.toString())
+    Text(other.anotherThing.text)
 }
 
 fun goGetThing(

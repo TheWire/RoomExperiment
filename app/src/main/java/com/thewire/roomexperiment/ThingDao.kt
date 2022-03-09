@@ -1,9 +1,7 @@
 package com.thewire.roomexperiment
 
 import androidx.room.*
-import com.thewire.roomexperiment.database.model.OtherThingEntity
-import com.thewire.roomexperiment.database.model.ThingAndOther
-import com.thewire.roomexperiment.database.model.ThingEntity
+import com.thewire.roomexperiment.database.model.*
 
 @Dao
 interface ThingDao {
@@ -25,6 +23,16 @@ interface ThingDao {
    @Query("SELECT * FROM things WHERE embedTest_exampleInt=:exInt")
    suspend fun getEmbedByInt(exInt: Int): List<ThingEntity>
 
+   @Insert
+   suspend fun insertAnotherThing(anotherThing: AnotherThingEntity): Long
+
+   @Transaction
+   @Insert(onConflict = OnConflictStrategy.IGNORE)
+   suspend fun insertOtherAndAnother(otherAndAnother: OtherAndAnother): Long {
+      val id = insertAnotherThing(otherAndAnother.anotherThing)
+      return insertOtherThing(otherAndAnother.otherThingEntity.copy(anotherThing = id.toInt()))
+   }
+
    @Transaction
    @Query("SELECT * FROM things WHERE ID =:id")
    suspend fun getThingWithOther(id: Int): ThingAndOther
@@ -32,8 +40,7 @@ interface ThingDao {
    @Transaction
    @Insert(onConflict = OnConflictStrategy.IGNORE)
    suspend fun insertThingAndOther(thingAndOther: ThingAndOther): Long {
-      val id = insertOtherThing(thingAndOther.otherThingEntity)
-
+      val id = insertOtherAndAnother(thingAndOther.otherThingEntity)
       return insertThing(thingAndOther.thing.copy(otherThingId = id.toInt()))
    }
 

@@ -1,7 +1,11 @@
 package com.thewire.roomexperiment
 
+import android.net.Uri
+import com.thewire.roomexperiment.database.model.OtherAndAnother
+import com.thewire.roomexperiment.database.model.OtherThingEntity
 import com.thewire.roomexperiment.database.model.ThingAndOther
 import com.thewire.roomexperiment.database.model.ThingEntity
+import com.thewire.roomexperiment.domain.model.OtherThing
 import com.thewire.roomexperiment.domain.model.Thing
 import com.thewire.roomexperiment.domain.model.ThingAndOtherModel
 
@@ -13,6 +17,7 @@ class ThingEntityMapper() {
             description = thingEntity.description,
             tf = thingEntity.tf,
             embed = thingEntity.embedTest,
+            n = thingEntity.n
         )
     }
 
@@ -21,6 +26,29 @@ class ThingEntityMapper() {
             description = thing.description,
             tf = thing.tf,
             embedTest = thing.embed,
+            n = thing.n
+        )
+    }
+}
+
+class OtherAndAnotherThingEntityMapper() {
+    fun mapEntityToDomain(otherAndAnother: OtherAndAnother) : OtherThing {
+        return OtherThing(
+            b = otherAndAnother.otherThingEntity.b,
+            i = otherAndAnother.otherThingEntity.i,
+            uri = Uri.parse(otherAndAnother.otherThingEntity.uri),
+            anotherThing = AnotherThingEntityMapper().mapEntityToDomain(otherAndAnother.anotherThing)
+        )
+    }
+
+    fun mapDomainToEntity(otherThing: OtherThing): OtherAndAnother {
+        return OtherAndAnother(
+            otherThingEntity = OtherThingEntity(
+                b = otherThing.b,
+                uri = otherThing.uri.toString(),
+                i = otherThing.i,
+            ),
+            anotherThing = AnotherThingEntityMapper().mapDomainToEntity(otherThing.anotherThing)
         )
     }
 }
@@ -33,7 +61,8 @@ class ThingOtherEntityMapper() {
             description = thingAndOther.thing.description,
             tf = thingAndOther.thing.tf,
             embed = thingAndOther.thing.embedTest,
-            other = OtherThingEntityMapper().mapEntityToDomain(thingAndOther.otherThingEntity),
+            n = thingAndOther.thing.n,
+            other = OtherAndAnotherThingEntityMapper().mapEntityToDomain(thingAndOther.otherThingEntity),
         )
     }
 
@@ -45,9 +74,10 @@ class ThingOtherEntityMapper() {
                     description = thingAndOtherModel.description,
                     tf = thingAndOtherModel.tf,
                     embed = thingAndOtherModel.embed,
+                    n = thingAndOtherModel.n
                 )
             ),
-            otherThingEntity = OtherThingEntityMapper().mapDomainToEntity(thingAndOtherModel.other),
+            otherThingEntity = OtherAndAnotherThingEntityMapper().mapDomainToEntity(thingAndOtherModel.other),
         )
     }
 }

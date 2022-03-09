@@ -22,4 +22,7 @@ data class ThingEntity(
 
     @ColumnInfo(name = "otherThingId")
     var otherThingId: Int = 0,
+
+    @ColumnInfo(name = "nh")
+    var n: String?,
 )
