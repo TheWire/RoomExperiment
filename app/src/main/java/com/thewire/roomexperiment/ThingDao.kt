@@ -44,4 +44,14 @@ interface ThingDao {
       return insertThing(thingAndOther.thing.copy(otherThingId = id.toInt()))
    }
 
+   @Transaction
+   @Insert(onConflict = OnConflictStrategy.REPLACE)
+   suspend fun insertThingsAndOthers(things: List<ThingAndOther>): LongArray {
+      val ret = arrayListOf<Long>()
+      things.forEach{
+         ret.add(insertThingAndOther(it))
+      }
+      return ret.toLongArray()
+   }
+
 }

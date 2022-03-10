@@ -18,10 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.room.Room
 import com.thewire.roomexperiment.database.AppDatabase
 import com.thewire.roomexperiment.domain.model.*
-import com.thewire.roomexperiment.interactors.GetByEmbed
-import com.thewire.roomexperiment.interactors.GetThing
-import com.thewire.roomexperiment.interactors.GetThingAndOther
-import com.thewire.roomexperiment.interactors.InsertThing
+import com.thewire.roomexperiment.interactors.*
 import com.thewire.roomexperiment.ui.theme.RoomExperimentTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -35,6 +32,7 @@ class MainActivity : ComponentActivity() {
     lateinit var getByEmbed: GetByEmbed
     lateinit var insertThing: InsertThing
     lateinit var getThingAndOther: GetThingAndOther
+    lateinit var insertManyThings: InsertManyThings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,12 +50,18 @@ class MainActivity : ComponentActivity() {
         getByEmbed = GetByEmbed(dao, mapper)
         insertThing = InsertThing(dao, otherMapper)
         getThingAndOther = GetThingAndOther(dao, otherMapper)
+        insertManyThings = InsertManyThings(dao, otherMapper)
 
         setContent {
             RoomExperimentTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    DatabaseScreen(getThingAndOther = getThingAndOther, getByEmbed = getByEmbed, insertThing = insertThing)
+                    DatabaseScreen(
+                        getThingAndOther = getThingAndOther,
+                        insertManyThings = insertManyThings,
+                        getByEmbed = getByEmbed,
+                        insertThing = insertThing
+                    )
                 }
             }
         }
@@ -65,12 +69,17 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, insertThing:InsertThing) {
+fun DatabaseScreen(
+    getThingAndOther: GetThingAndOther,
+    insertManyThings: InsertManyThings,
+    getByEmbed: GetByEmbed,
+    insertThing: InsertThing
+) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        val description = remember{ mutableStateOf("")}
-        val tf = remember{ mutableStateOf(false)}
+        val description = remember { mutableStateOf("") }
+        val tf = remember { mutableStateOf(false) }
         TextField(
             value = description.value,
             onValueChange = { description.value = it },
@@ -80,42 +89,42 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
             checked = tf.value,
             onCheckedChange = { tf.value = it }
         )
-        val embedString = remember{ mutableStateOf("")}
+        val embedString = remember { mutableStateOf("") }
         TextField(
             value = embedString.value,
             onValueChange = { embedString.value = it },
             label = { Text("insert embed text") }
         )
-        val embedInt = remember{ mutableStateOf("")}
+        val embedInt = remember { mutableStateOf("") }
         TextField(
             value = embedInt.value,
             onValueChange = { embedInt.value = it },
             label = { Text("insert embed int") }
         )
-        val nString = remember{ mutableStateOf("")}
+        val nString = remember { mutableStateOf("") }
         TextField(
             value = nString.value,
             onValueChange = { nString.value = it },
             label = { Text("nullable string") }
         )
-        val othertf = remember{ mutableStateOf(false)}
+        val othertf = remember { mutableStateOf(false) }
         Checkbox(
             checked = othertf.value,
             onCheckedChange = { othertf.value = it }
         )
-        val otherUri = remember{ mutableStateOf("")}
+        val otherUri = remember { mutableStateOf("") }
         TextField(
             value = otherUri.value,
             onValueChange = { otherUri.value = it },
             label = { Text("other thing uri") }
         )
-        val otherInt = remember{ mutableStateOf("")}
+        val otherInt = remember { mutableStateOf("") }
         TextField(
             value = otherInt.value,
             onValueChange = { otherInt.value = it },
             label = { Text("other thing int") }
         )
-        val anotherText = remember{ mutableStateOf("")}
+        val anotherText = remember { mutableStateOf("") }
         TextField(
             value = anotherText.value,
             onValueChange = { anotherText.value = it },
@@ -123,7 +132,7 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
         )
         Button(
             onClick = {
-                if(description.value != "") {
+                if (description.value != "") {
                     goInsertThing(
                         ThingAndOtherModel(
                             0,
@@ -140,18 +149,20 @@ fun DatabaseScreen(getThingAndOther: GetThingAndOther, getByEmbed: GetByEmbed, i
                                 uri = Uri.parse(otherUri.value),
                                 anotherThing = AnotherThing(anotherText.value)
                             )
-                        ), insertThing, MainScope())
+                        ), insertThing, MainScope()
+                    )
                     description.value = ""
                 }
             }
         ) {
             Text("Insert")
         }
+        MultipleThingsInserter(insertManyThings = insertManyThings, scope = MainScope())
         ThingGetter(
             getThingAndOther = getThingAndOther
         )
         EmbedGetter(
-           getByEmbed = getByEmbed
+            getByEmbed = getByEmbed
         )
     }
 
@@ -164,7 +175,7 @@ fun ThingGetter(getThingAndOther: GetThingAndOther) {
         val list: MutableList<ThingAndOtherModel> = remember {
             mutableStateListOf()
         }
-        val idString = remember { mutableStateOf("")}
+        val idString = remember { mutableStateOf("") }
         TextField(
             value = idString.value,
             onValueChange = { idString.value = it },
@@ -172,8 +183,8 @@ fun ThingGetter(getThingAndOther: GetThingAndOther) {
         )
         Button(
             onClick = {
-                    goGetThingAndOther(idString.value.toInt(), getThingAndOther, list, MainScope())
-                }
+                goGetThingAndOther(idString.value.toInt(), getThingAndOther, list, MainScope())
+            }
         ) {
             Text("Get")
         }
@@ -199,7 +210,7 @@ fun EmbedGetter(getByEmbed: GetByEmbed) {
         val list: MutableList<Thing> = remember {
             mutableStateListOf()
         }
-        val idString = remember { mutableStateOf("")}
+        val idString = remember { mutableStateOf("") }
         TextField(
             value = idString.value,
             onValueChange = { idString.value = it },
@@ -239,23 +250,79 @@ fun OtherThing(other: OtherThing) {
     Text(other.anotherThing.text)
 }
 
+@Composable
+fun MultipleThingsInserter(insertManyThings: InsertManyThings, scope: CoroutineScope) {
+    val manyThings = listOf(
+        ThingAndOtherModel(
+            id = 0,
+            description = "derp",
+            tf = true,
+            embed = Embed(
+                exampleString = "foo",
+                exampleInt = 33
+            ),
+            n = "bar",
+            other = OtherThing(
+                b = false,
+                i = 72,
+                uri = Uri.parse("www.bbc.co.uk"),
+                anotherThing = AnotherThing(
+                    text = "baz"
+                )
+            )
+        ),
+        ThingAndOtherModel(
+            id = 0,
+            description = "zxc",
+            tf = false,
+            embed = Embed(
+                exampleString = "hjk",
+                exampleInt = 34
+            ),
+            n = "yui",
+            other = OtherThing(
+                b = true,
+                i = 956,
+                uri = Uri.parse("www.netflix.com"),
+                anotherThing = AnotherThing(
+                    text = "wer"
+                )
+            )
+        )
+    )
+    Button(
+        onClick = {
+            scope.launch {
+                insertManyThings.execute(manyThings).collect {
+                    it.error?.let { error ->
+                        Log.e(TAG, error)
+                    }
+                }
+            }
+        }
+
+    ) {
+        Text("insert many things")
+    }
+}
+
 fun goGetThing(
     thingId: Int,
     getThing: GetThing,
     list: MutableList<Thing>,
     scope: CoroutineScope
 ) {
-        scope.launch {
-            getThing.execute(thingId).collect {
-                it.data?.let { thing ->
-                    list.add(thing)
-                }
+    scope.launch {
+        getThing.execute(thingId).collect {
+            it.data?.let { thing ->
+                list.add(thing)
+            }
 
-                it.error?.let { error ->
-                    Log.e(TAG, error)
-                }
+            it.error?.let { error ->
+                Log.e(TAG, error)
             }
         }
+    }
 }
 
 fun goGetThingAndOther(
@@ -302,7 +369,7 @@ fun goInsertThing(thing: ThingAndOtherModel, insertThing: InsertThing, scope: Co
     scope.launch {
         insertThing.execute(thing).collect {
             it.error?.let { error ->
-              Log.e(TAG, error)
+                Log.e(TAG, error)
             }
         }
     }
