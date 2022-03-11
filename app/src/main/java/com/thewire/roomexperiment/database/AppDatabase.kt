@@ -9,7 +9,7 @@ import com.thewire.roomexperiment.database.model.OtherThingEntity
 import com.thewire.roomexperiment.database.model.ThingEntity
 import com.thewire.roomexperiment.database.model.ThingTypeConverter
 
-@Database(entities = [ThingEntity::class, OtherThingEntity::class, AnotherThingEntity::class], version = 7)
+@Database(entities = [ThingEntity::class, OtherThingEntity::class, AnotherThingEntity::class], version = 8)
 @TypeConverters(ThingTypeConverter::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun thingDao(): ThingDao

@@ -26,7 +26,8 @@ class ThingEntityMapper() {
             description = thing.description,
             tf = thing.tf,
             embedTest = thing.embed,
-            n = thing.n
+            n = thing.n,
+            otherThingId = 0,
         )
     }
 }
@@ -37,7 +38,7 @@ class OtherAndAnotherThingEntityMapper() {
             b = otherAndAnother.otherThingEntity.b,
             i = otherAndAnother.otherThingEntity.i,
             uri = Uri.parse(otherAndAnother.otherThingEntity.uri),
-            anotherThing = AnotherThingEntityMapper().mapEntityToDomain(otherAndAnother.anotherThing)
+            anotherThing = otherAndAnother.anotherThing?.let{ AnotherThingEntityMapper().mapEntityToDomain(it) }
         )
     }
 
@@ -62,7 +63,7 @@ class ThingOtherEntityMapper() {
             tf = thingAndOther.thing.tf,
             embed = thingAndOther.thing.embedTest,
             n = thingAndOther.thing.n,
-            other = OtherAndAnotherThingEntityMapper().mapEntityToDomain(thingAndOther.otherThingEntity),
+            other = thingAndOther.otherThingEntity?.let { OtherAndAnotherThingEntityMapper().mapEntityToDomain(it) },
         )
     }
 
@@ -77,7 +78,7 @@ class ThingOtherEntityMapper() {
                     n = thingAndOtherModel.n
                 )
             ),
-            otherThingEntity = OtherAndAnotherThingEntityMapper().mapDomainToEntity(thingAndOtherModel.other),
+            otherThingEntity = thingAndOtherModel.other?.let { OtherAndAnotherThingEntityMapper().mapDomainToEntity(it) },
         )
     }
 }

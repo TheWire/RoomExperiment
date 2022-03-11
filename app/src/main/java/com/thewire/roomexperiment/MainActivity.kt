@@ -198,7 +198,10 @@ fun ThingGetter(getThingAndOther: GetThingAndOther) {
                     n = it.n
                 )
             )
-            OtherThing(it.other)
+            it.other?.let { other ->
+                OtherThing(other)
+            }
+
         }
     }
 }
@@ -288,6 +291,16 @@ fun MultipleThingsInserter(insertManyThings: InsertManyThings, scope: CoroutineS
                     text = "wer"
                 )
             )
+        ),
+        ThingAndOtherModel(
+            id = 0,
+            description = "fgh",
+            tf = true,
+            embed = Embed(
+                exampleString = "wer",
+                exampleInt = 52
+            ),
+            n = "cvb",
         )
     )
     Button(

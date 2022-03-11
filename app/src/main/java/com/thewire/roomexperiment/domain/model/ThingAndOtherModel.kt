@@ -6,5 +6,5 @@ data class ThingAndOtherModel(
     val tf: Boolean,
     val embed: Embed,
     val n: String?,
-    val other: OtherThing
+    val other: OtherThing? = null
 )

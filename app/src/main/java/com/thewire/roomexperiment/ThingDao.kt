@@ -40,8 +40,10 @@ interface ThingDao {
    @Transaction
    @Insert(onConflict = OnConflictStrategy.IGNORE)
    suspend fun insertThingAndOther(thingAndOther: ThingAndOther): Long {
-      val id = insertOtherAndAnother(thingAndOther.otherThingEntity)
-      return insertThing(thingAndOther.thing.copy(otherThingId = id.toInt()))
+      val id = thingAndOther.otherThingEntity?.let { otherAndAnother ->
+         insertOtherAndAnother(otherAndAnother)
+      }
+      return insertThing(thingAndOther.thing.copy(otherThingId = id?.toInt()))
    }
 
    @Transaction

@@ -13,5 +13,5 @@ data class ThingAndOther(
         parentColumn = "otherThingId",
         entityColumn = "id"
     )
-    val otherThingEntity: OtherAndAnother
+    val otherThingEntity: OtherAndAnother?
 )
