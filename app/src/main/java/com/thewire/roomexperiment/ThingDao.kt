@@ -59,4 +59,7 @@ interface ThingDao {
    @Query("DELETE FROM things WHERE ID=:id")
    suspend fun deleteThing(id: Int): Int
 
+   @Query("DELETE FROM things")
+   suspend fun deleteAllThings(): Int
+
 }

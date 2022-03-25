@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
     lateinit var getThingAndOther: GetThingAndOther
     lateinit var insertManyThings: InsertManyThings
     lateinit var deleteThing: DeleteThing
+    lateinit var deleteAllThings: DeleteAllThings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
         getThingAndOther = GetThingAndOther(dao, otherMapper)
         insertManyThings = InsertManyThings(dao, otherMapper)
         deleteThing = DeleteThing(dao)
+        deleteAllThings = DeleteAllThings(dao)
 
         setContent {
             RoomExperimentTheme {
@@ -65,6 +67,7 @@ class MainActivity : ComponentActivity() {
                         getByEmbed = getByEmbed,
                         insertThing = insertThing,
                         deleteThing = deleteThing,
+                        deleteAllThings = deleteAllThings,
                     )
                 }
             }
@@ -79,6 +82,7 @@ fun DatabaseScreen(
     getByEmbed: GetByEmbed,
     insertThing: InsertThing,
     deleteThing: DeleteThing,
+    deleteAllThings: DeleteAllThings,
 ) {
     Column(
         modifier = Modifier
@@ -165,6 +169,7 @@ fun DatabaseScreen(
             Text("Insert")
         }
         ThingDeleter(deleteThing = deleteThing)
+        AllThingsDeleter(deleteAllThings = deleteAllThings)
         MultipleThingsInserter(insertManyThings = insertManyThings, scope = MainScope())
         ThingGetter(
             getThingAndOther = getThingAndOther
@@ -263,6 +268,33 @@ fun ThingDeleter(deleteThing: DeleteThing) {
 fun doDeleteThing(thingId: Int, deleteThing: DeleteThing, scope: CoroutineScope) {
     scope.launch {
         deleteThing.execute(thingId).collect {
+            it.data?.let { data ->
+                println(data)
+            }
+            it.error?.let { error ->
+                Log.e(TAG, error)
+            }
+        }
+    }
+}
+
+@Composable
+fun AllThingsDeleter(deleteAllThings: DeleteAllThings) {
+    Column() {
+        Button(
+            onClick = {
+                doDeleteAllThings(deleteAllThings, MainScope())
+            }
+        ) {
+            Text("Delete All Things")
+        }
+    }
+}
+
+
+fun doDeleteAllThings(deleteAllThings: DeleteAllThings, scope: CoroutineScope) {
+    scope.launch {
+        deleteAllThings.execute().collect {
             it.data?.let { data ->
                 println(data)
             }
