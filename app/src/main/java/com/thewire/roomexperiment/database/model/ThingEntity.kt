@@ -21,7 +21,7 @@ data class ThingEntity(
     var embedTest: Embed,
 
     @ColumnInfo(name = "otherThingId")
-    var otherThingId: Int?,
+    var otherThingId: Int? = null,
 
     @ColumnInfo(name = "nh")
     var n: String?,

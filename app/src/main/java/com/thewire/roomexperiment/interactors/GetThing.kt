@@ -23,7 +23,7 @@ class GetThing(
             if(thing != null) {
                 emit(DataState.success(thing))
             } else {
-                emit(DataState.error<Thing>("cannot not find thing"))
+                emit(DataState.error<Thing>("cannot find thing"))
             }
         } catch(e: Exception) {
             emit(DataState.error<Thing>(e.message?: "Unknown error"))

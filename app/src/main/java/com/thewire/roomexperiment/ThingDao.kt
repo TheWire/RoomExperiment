@@ -56,4 +56,7 @@ interface ThingDao {
       return ret.toLongArray()
    }
 
+   @Query("DELETE FROM things WHERE ID=:id")
+   suspend fun deleteThing(id: Int): Int
+
 }

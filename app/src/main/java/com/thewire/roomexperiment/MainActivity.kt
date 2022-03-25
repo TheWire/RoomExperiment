@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
     lateinit var insertThing: InsertThing
     lateinit var getThingAndOther: GetThingAndOther
     lateinit var insertManyThings: InsertManyThings
+    lateinit var deleteThing: DeleteThing
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
         insertThing = InsertThing(dao, otherMapper)
         getThingAndOther = GetThingAndOther(dao, otherMapper)
         insertManyThings = InsertManyThings(dao, otherMapper)
+        deleteThing = DeleteThing(dao)
 
         setContent {
             RoomExperimentTheme {
@@ -60,7 +63,8 @@ class MainActivity : ComponentActivity() {
                         getThingAndOther = getThingAndOther,
                         insertManyThings = insertManyThings,
                         getByEmbed = getByEmbed,
-                        insertThing = insertThing
+                        insertThing = insertThing,
+                        deleteThing = deleteThing,
                     )
                 }
             }
@@ -73,10 +77,13 @@ fun DatabaseScreen(
     getThingAndOther: GetThingAndOther,
     insertManyThings: InsertManyThings,
     getByEmbed: GetByEmbed,
-    insertThing: InsertThing
+    insertThing: InsertThing,
+    deleteThing: DeleteThing,
 ) {
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState())
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
     ) {
         val description = remember { mutableStateOf("") }
         val tf = remember { mutableStateOf(false) }
@@ -157,6 +164,7 @@ fun DatabaseScreen(
         ) {
             Text("Insert")
         }
+        ThingDeleter(deleteThing = deleteThing)
         MultipleThingsInserter(insertManyThings = insertManyThings, scope = MainScope())
         ThingGetter(
             getThingAndOther = getThingAndOther
@@ -228,6 +236,39 @@ fun EmbedGetter(getByEmbed: GetByEmbed) {
         }
         list.forEach {
             Thing(it)
+        }
+    }
+}
+
+@Composable
+fun ThingDeleter(deleteThing: DeleteThing) {
+    Column() {
+        val thingId = remember { mutableStateOf("") }
+        TextField(
+            value = thingId.value,
+            onValueChange = { thingId.value = it },
+            label = { Text("thing id") }
+        )
+        Button(
+            onClick = {
+                doDeleteThing(thingId.value.toInt(), deleteThing, MainScope())
+            }
+        ) {
+            Text("DeleteThing")
+        }
+    }
+}
+
+
+fun doDeleteThing(thingId: Int, deleteThing: DeleteThing, scope: CoroutineScope) {
+    scope.launch {
+        deleteThing.execute(thingId).collect {
+            it.data?.let { data ->
+                println(data)
+            }
+            it.error?.let { error ->
+                Log.e(TAG, error)
+            }
         }
     }
 }

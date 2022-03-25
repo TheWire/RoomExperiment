@@ -27,7 +27,6 @@ class ThingEntityMapper() {
             tf = thing.tf,
             embedTest = thing.embed,
             n = thing.n,
-            otherThingId = 0,
         )
     }
 }
