@@ -5,6 +5,7 @@ import com.thewire.roomexperiment.database.model.OtherAndAnother
 import com.thewire.roomexperiment.database.model.OtherThingEntity
 import com.thewire.roomexperiment.database.model.ThingAndOther
 import com.thewire.roomexperiment.database.model.ThingEntity
+import com.thewire.roomexperiment.domain.model.AnotherThing
 import com.thewire.roomexperiment.domain.model.OtherThing
 import com.thewire.roomexperiment.domain.model.Thing
 import com.thewire.roomexperiment.domain.model.ThingAndOtherModel
@@ -37,7 +38,7 @@ class OtherAndAnotherThingEntityMapper() {
             b = otherAndAnother.otherThingEntity.b,
             i = otherAndAnother.otherThingEntity.i,
             uri = Uri.parse(otherAndAnother.otherThingEntity.uri),
-            anotherThing = otherAndAnother.anotherThing?.let{ AnotherThingEntityMapper().mapEntityToDomain(it) }
+            anotherThing = otherAndAnother.anotherThing?.let{ AnotherThingEntityMapper().mapEntityToDomain(it) } ?: AnotherThing("default another thing")
         )
     }
 

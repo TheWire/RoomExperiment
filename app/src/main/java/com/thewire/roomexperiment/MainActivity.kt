@@ -1,6 +1,5 @@
 package com.thewire.roomexperiment
 
-import android.app.Application
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -17,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.room.Room
+import com.thewire.experimentallibrary.ExperimentalMath
 import com.thewire.roomexperiment.database.AppDatabase
 import com.thewire.roomexperiment.domain.model.*
 import com.thewire.roomexperiment.interactors.*
@@ -24,7 +24,6 @@ import com.thewire.roomexperiment.ui.theme.RoomExperimentTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collect
 
 const val TAG = "room_debug"
 
@@ -177,6 +176,7 @@ fun DatabaseScreen(
         EmbedGetter(
             getByEmbed = getByEmbed
         )
+        Cuber()
     }
 
 }
@@ -274,6 +274,25 @@ fun doDeleteThing(thingId: Int, deleteThing: DeleteThing, scope: CoroutineScope)
             it.error?.let { error ->
                 Log.e(TAG, error)
             }
+        }
+    }
+}
+
+//this is a library test and has nothing ot do with this project
+@Composable
+fun Cuber() {
+    val experimentalMath = ExperimentalMath()
+    Column() {
+        val textValue = remember {
+            mutableStateOf("")
+        }
+        TextField(value = textValue.value, onValueChange = {
+            textValue.value = it
+        })
+        Button(
+            onClick = {textValue.value = experimentalMath.cube(textValue.value.toFloat()).toString()}
+        ) {
+            Text("cube")
         }
     }
 }
