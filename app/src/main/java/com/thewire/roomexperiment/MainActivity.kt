@@ -294,6 +294,16 @@ fun Cuber() {
         ) {
             Text("cube")
         }
+        Button(
+            onClick = {textValue.value = experimentalMath.cubeRoot(textValue.value.toFloat()).toString()}
+        ) {
+            Text("cubeRoot")
+        }
+        Button(
+            onClick = {textValue.value = experimentalMath.add(textValue.value.toFloat(), textValue.value.toFloat()).toString()}
+        ) {
+            Text("add")
+        }
     }
 }
 
